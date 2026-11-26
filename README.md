@@ -1,4 +1,4 @@
-# Mecha Viva
+# Untitled  Bomberman Game
 
 Roguelike de escritorio en Java Swing. Derrota enemigos con bombas, encuentra la salida y elige una de tres cartas. Cada nivel genera un laberinto y la partida continúa hasta que pierdes toda la vida.
 
