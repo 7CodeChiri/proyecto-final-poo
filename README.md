@@ -6,7 +6,13 @@ Roguelike de escritorio en Java Swing. Cruza laberintos, derrota enemigos con bo
 
 Instala el **JDK 21** y confirma con `java -version`. El Maven Wrapper descarga **Maven 3.9.9**. La primera compilación requiere Internet.
 
-Clona el repositorio o usa **Code → Download ZIP** y descomprime. Abre una terminal en la carpeta que contiene `pom.xml`.
+Clona el repositorio o usa **Code → Download ZIP** y descomprime. Abre PowerShell y entra a la carpeta que contiene `pom.xml`. Si lo descomprimiste en Descargas con el nombre indicado, usa:
+
+```powershell
+cd "$env:USERPROFILE\Downloads\Untitled-Bomberman-Game"
+```
+
+Si lo descomprimiste en otra carpeta, cambia la ruta por la tuya.
 
 **Windows (PowerShell)**
 
@@ -16,15 +22,7 @@ Clona el repositorio o usa **Code → Download ZIP** y descomprime. Abre una ter
 java -jar .\launcher\target\launcher-0.1.0-SNAPSHOT.jar
 ```
 
-**Linux y macOS**
-
-```sh
-./mvnw -version
-./mvnw clean verify
-java -jar launcher/target/launcher-0.1.0-SNAPSHOT.jar
-```
-
-En NetBeans, abre la misma carpeta mediante **File → Open Project**, selecciona el JDK 21 y ejecuta **Clean and Build** sobre el proyecto padre. Ejecuta el JAR con el comando anterior. Si PowerShell muestra Java 8, puede fallar aunque NetBeans ya haya compilado el proyecto. Configura el JDK 21 para esta sesión antes de ejecutar el Wrapper o el JAR.
+En NetBeans, abre la misma carpeta mediante **File → Open Project**, selecciona el JDK 21 y ejecuta **Clean and Build** sobre el proyecto padre. Si PowerShell muestra Java 8, puede fallar aunque NetBeans ya haya compilado el proyecto. Configura el JDK 21 para esta sesión antes de ejecutar el Wrapper o el JAR.
 
 ```powershell
 $env:JAVA_HOME = "C:\ruta\al\jdk-21"
@@ -37,6 +35,7 @@ java -jar .\launcher\target\launcher-0.1.0-SNAPSHOT.jar
 Reemplaza la ruta de ejemplo por la carpeta de tu JDK. Si NetBeans ya mostró `BUILD SUCCESS` y el JAR existe, puedes abrirlo directamente con el Java que usa NetBeans. Esta ruta corresponde a una instalación de NetBeans que incluye un JDK compatible.
 
 ```powershell
+cd "$env:USERPROFILE\Downloads\Untitled-Bomberman-Game"
 & "C:\Program Files\Apache NetBeans\jdk\bin\java.exe" -jar ".\launcher\target\launcher-0.1.0-SNAPSHOT.jar"
 ```
 
