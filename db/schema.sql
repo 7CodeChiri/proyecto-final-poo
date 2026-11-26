@@ -1,0 +1,15 @@
+CREATE TABLE IF NOT EXISTS profiles (
+    id INTEGER PRIMARY KEY,
+    alias TEXT NOT NULL COLLATE NOCASE UNIQUE CHECK(length(alias) BETWEEN 1 AND 32)
+);
+
+CREATE TABLE IF NOT EXISTS runs (
+    id INTEGER PRIMARY KEY,
+    profile_id INTEGER NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    level INTEGER NOT NULL CHECK(level > 0),
+    enemies INTEGER NOT NULL CHECK(enemies >= 0),
+    seconds INTEGER NOT NULL CHECK(seconds >= 0),
+    recorded_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS runs_profile_idx ON runs(profile_id, id);

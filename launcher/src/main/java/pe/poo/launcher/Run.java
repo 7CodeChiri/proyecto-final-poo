@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Random;
 
+/** Owns the state and rules of a single playable run. */
 final class Run {
     enum Card {
         EXTRA("Carga extra", "+1 bomba simultánea"),
@@ -43,7 +44,7 @@ final class Run {
     final Map<Cell, Long> flames = new HashMap<>();
     final Set<Cell> blast = new HashSet<>();
     final Cell exit = new Cell(Arena.EXIT_X, Arena.EXIT_Y);
-    final LevelSelector selector = new LevelSelector();
+    final LevelSelector selector;
 
     Arena arena;
     Cell player;
@@ -55,6 +56,8 @@ final class Run {
     int health;
     int maxHealth;
     int damage;
+    int defeated;
+    long totalMillis;
     int capacity;
     int range;
     int moveDelay;
@@ -65,7 +68,12 @@ final class Run {
     long protectedUntil;
     long elapsedSeconds;
 
-    Run() { restart(); }
+    Run() { this(new LevelSelector()); }
+
+    Run(LevelSelector selector) {
+        this.selector = selector;
+        restart();
+    }
 
     void restart() {
         health = maxHealth = 4;
@@ -74,6 +82,8 @@ final class Run {
         moveDelay = 150;
         shield = false;
         level = 0;
+        defeated = 0;
+        totalMillis = 0;
         damage = 0;
         elapsedSeconds = 0;
         nextLevel();
@@ -136,6 +146,8 @@ final class Run {
             return;
         }
         clock += millis;
+        totalMillis += millis;
+        int enemiesBefore = enemies.size();
         flames.values().removeIf(expiry -> expiry <= clock);
         blast.clear();
         var pending = new java.util.ArrayDeque<>(bombs.entrySet().stream()
@@ -189,6 +201,7 @@ final class Run {
             }
             protectedUntil = clock + 1200;
         }
+        defeated += enemiesBefore - enemies.size();
         if (health == 0) {
             phase = Phase.LOST;
         } else if (enemies.isEmpty() && player.equals(exit)) {

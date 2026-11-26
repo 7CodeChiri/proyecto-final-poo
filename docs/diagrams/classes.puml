@@ -1,0 +1,52 @@
+@startuml
+skinparam classAttributeIconSize 0
+interface "Strategy<I, O>" as Strategy {
+  +id(): String
+  +supports(request: I): boolean
+  +execute(request: I): O
+}
+class BalancedGenerator
+class RecoveryGenerator
+class ChallengeGenerator <<Scala>>
+Strategy <|.. BalancedGenerator
+Strategy <|.. RecoveryGenerator
+Strategy <|.. ChallengeGenerator
+class LevelSelector {
+  +generate(request: LevelRequest): Selection
+}
+class DifficultyConfig {
+  +recoveryDamage(): int
+  +challengeSeconds(): int
+}
+class LevelRequest
+class LevelLayout
+class Run
+class Arena
+abstract class Enemy
+class Patrol
+class Chaser
+class GameWindow
+class ProfilesPanel
+class ProfileStore {
+  +create(alias: String)
+  +profiles(): List<Profile>
+  +rename(id: long, alias: String)
+  +delete(id: long)
+  +save(id: long, level: int, enemies: int, seconds: long)
+  +history(id: long): List<Score>
+}
+Enemy <|-- Patrol
+Enemy <|-- Chaser
+GameWindow *-- Run
+GameWindow *-- ProfilesPanel
+GameWindow --> ProfileStore
+ProfilesPanel --> ProfileStore
+Run *-- Arena
+Run *-- "0..*" Enemy
+Run --> LevelSelector
+LevelSelector --> DifficultyConfig
+LevelSelector ..> Strategy : Reflection
+LevelSelector ..> LevelRequest
+LevelSelector ..> LevelLayout
+LevelLayout --> Arena
+@enduml

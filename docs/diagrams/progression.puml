@@ -1,0 +1,24 @@
+@startuml
+actor Jugador
+participant GameWindow
+participant Run
+participant LevelSelector
+participant "Strategy<LevelRequest, LevelLayout>" as Plugin
+database ProfileStore
+Jugador -> GameWindow : Cruza la salida desbloqueada
+GameWindow -> Run : tick()
+Run -> Run : Registra daño y tiempo
+GameWindow --> Jugador : Muestra tres cartas
+Jugador -> GameWindow : Elige una carta
+GameWindow -> Run : choose(carta)
+Run -> Run : Aplica mejora
+Run -> LevelSelector : generate(solicitud)
+LevelSelector -> LevelSelector : Evalúa reglas y carga clase
+LevelSelector -> Plugin : supports() y execute()
+Plugin --> Run : Arena y cantidad de enemigos
+GameWindow --> Jugador : Muestra el siguiente nivel
+opt Se pierde toda la vida
+  GameWindow -> ProfileStore : save(perfil, nivel, bajas, segundos)
+  GameWindow --> Jugador : Muestra el fin de la partida
+end
+@enduml

@@ -1,0 +1,14 @@
+PROJECT_NAME           = "Untitled Bomberman Game"
+OUTPUT_DIRECTORY       = launcher/target/doxygen
+INPUT                  = README.md docs/architecture.md plugin-api/src/main/java domain/src/main/java adaptive-core/src/main/java plugins-java/src/main/java persistence/src/main/java launcher/src/main/java
+USE_MDFILE_AS_MAINPAGE = README.md
+FILE_PATTERNS          = *.java *.md
+RECURSIVE              = YES
+EXTRACT_ALL            = YES
+EXTRACT_PACKAGE        = YES
+JAVADOC_AUTOBRIEF      = YES
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+HAVE_DOT               = YES
+CLASS_GRAPH            = YES
+COLLABORATION_GRAPH    = YES

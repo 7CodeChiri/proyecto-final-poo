@@ -1,70 +1,59 @@
-# Untitled  Bomberman Game
+# Untitled Bomberman Game
 
-Roguelike de escritorio en Java Swing. Derrota enemigos con bombas, encuentra la salida y elige una de tres cartas. Cada nivel genera un laberinto y la partida continúa hasta que pierdes toda la vida.
+Roguelike de escritorio en Java Swing. Cruza laberintos, derrota enemigos con bombas y elige una de tres cartas al superar cada nivel. El siguiente mapa se adapta al desempeño del jugador.
 
-## Ejecutar
+## Compilar y jugar
 
-Requisitos: **JDK 21** y **Maven 3.9.x**. La primera compilación requiere Internet para descargar las dependencias. Verifica que `java -version` y `mvn -version` indiquen Java 21.
+Instala el **JDK 21** y confirma con `java -version`. El Maven Wrapper descarga **Maven 3.9.9**. La primera compilación requiere Internet.
 
-### NetBeans
+Clona el repositorio o usa **Code → Download ZIP** y descomprime. Abre una terminal en la carpeta que contiene `pom.xml`.
 
-1. Clona el repositorio o descarga **Code → Download ZIP** y descomprímelo.
-2. Abre **File → Open Project** y selecciona la carpeta raíz que contiene el `pom.xml`. Configura JDK 21 en NetBeans.
-3. Haz clic derecho sobre **mecha-viva** y selecciona **Clean and Build**.
-4. Cuando aparezca `BUILD SUCCESS`, ejecuta el JAR desde una terminal abierta en la carpeta raíz.
-
-```sh
-java -jar launcher/target/launcher-0.1.0-SNAPSHOT.jar
-```
-
-### Terminal
-
-```sh
-git clone https://github.com/7CodeChiri/proyecto-final-poo.git
-cd proyecto-final-poo
-mvn clean verify
-java -jar launcher/target/launcher-0.1.0-SNAPSHOT.jar
-```
-
-Si Windows tiene otra versión de Java en el PATH, ejecuta el binario del JDK 21 directamente desde PowerShell.
+**Windows (PowerShell)**
 
 ```powershell
-& "C:\ruta\a\jdk-21\bin\java.exe" -jar ".\launcher\target\launcher-0.1.0-SNAPSHOT.jar"
+.\mvnw.cmd -version
+.\mvnw.cmd clean verify
+java -jar .\launcher\target\launcher-0.1.0-SNAPSHOT.jar
 ```
 
-## Controles y reglas
+**Linux y macOS**
 
-- **WASD o flechas** para moverte y **Espacio** para colocar una bomba.
-- Las explosiones avanzan en cruz, destruyen cajas, alcanzan enemigos y pueden activar otras bombas. Las paredes detienen la explosión.
-- La salida se abre al derrotar a todos los enemigos. Selecciona una carta con el mouse para avanzar. Las mejoras se conservan hasta que termina la partida.
-- El patrullero elige una casilla libre al azar. El perseguidor prefiere la casilla que reduce la distancia al jugador.
-- La simulación trabaja con una cuadrícula. La ventana interpola la posición del jugador y los enemigos para que se deslicen entre casillas.
+```sh
+./mvnw -version
+./mvnw clean verify
+java -jar launcher/target/launcher-0.1.0-SNAPSHOT.jar
+```
 
-## Dificultad adaptativa
+En NetBeans, abre la misma carpeta mediante **File → Open Project**, selecciona el JDK 21 y ejecuta **Clean and Build** sobre el proyecto padre. Ejecuta el JAR con el comando anterior. Si `java -version` muestra otro JDK, configura `JAVA_HOME` y el PATH antes de compilar o usa el ejecutable del JDK 21 directamente para abrir el JAR.
 
-El primer nivel utiliza el generador equilibrado. Al cruzar la salida, el juego registra el daño recibido y el tiempo del nivel. El selector evalúa las reglas en este orden.
+## Jugar y guardar el historial
 
-| Condición del nivel anterior | Implementación |
+1. Crea un perfil, selecciónalo y pulsa **Jugar**.
+2. Muévete con **WASD o las flechas** y coloca bombas con **Espacio**.
+3. Derrota a todos los enemigos, cruza la salida y elige una carta con el mouse.
+4. Al perder toda la vida, el juego guarda nivel, bajas y tiempo activo. Pulsa **Perfiles** para consultar la partida, editar el alias o eliminar un perfil de prueba.
+
+SQLite crea `bomberman.db` en el directorio desde el que ejecutas el juego. Puedes definir `BOMBERMAN_DB` para elegir otra ruta. La base local y el archivo `.env` están excluidos del repositorio. [Esquema SQL](db/schema.sql)
+
+## Dificultad adaptable
+
+El primer nivel es equilibrado. Cuando cruzas la salida, la partida mide **daño recibido** y **segundos de juego activo**. Tras elegir una carta, el selector evalúa las reglas en este orden.
+
+| Escenario con los parámetros iniciales | Generador |
 | --- | --- |
-| Perdiste al menos 2 puntos de vida | `RecoveryGenerator` · Java |
-| Perdiste menos de 2 puntos y tardaste menos de 45 segundos | `ChallengeGenerator` · Scala |
-| Los demás casos | `BalancedGenerator` · Java |
+| Perdió 2 puntos de vida o más | Recuperación · Java |
+| Perdió menos de 2 puntos y tardó menos de 45 segundos | Desafío · Scala |
+| Perdió menos de 2 puntos y tardó 45 segundos o más | Equilibrado · Java |
 
-`LevelSelector` carga la clase con Reflection, valida que implemente `Strategy`, invoca el constructor y ejecuta el generador. La ventana muestra el modo y el motivo. El juego también registra la semilla del mapa en la terminal.
+Edita [`config/difficulty.json`](config/difficulty.json) y reinicia para cambiar los umbrales o las clases configuradas. `BOMBERMAN_CONFIG` permite elegir otra ruta. Si el archivo externo está ausente, el JAR usa la configuración incorporada.
 
-## Módulos
+El selector carga la clase por nombre, verifica que implemente `Strategy`, invoca el constructor y ejecuta la estrategia. La ventana muestra el generador y su motivo. El registro de terminal añade la semilla y las métricas.
 
-| Módulo | Responsabilidad |
-| --- | --- |
-| `plugin-api` | Contrato genérico `Strategy<I, O>`. |
-| `domain` | Arena, solicitud y resultado de generación, enemigo abstracto y sus dos variantes. |
-| `adaptive-core` | Reglas de selección y carga por Reflection. |
-| `plugins-java` | Generadores equilibrado y de recuperación. |
-| `plugins-scala` | Generador de desafío. |
-| `launcher` | Ventana Swing, controles, reglas de partida y pruebas JUnit 5. |
+## Documentación y entrega
 
-`GameTest` comprueba los tres generadores, el corredor de salida, la selección de cartas y el daño de las bombas. GitHub Actions ejecuta `mvn clean verify` y adjunta el JAR si la compilación pasa.
+- [Arquitectura](docs/architecture.md) y [diagramas PlantUML](docs/diagrams/)
+- [Pruebas y reporte de cobertura](docs/testing.md)
+- [Presentación](docs/presentacion.md) y [guion para la defensa](docs/defensa.md)
+- [Doxygen](Doxyfile) y [plantilla de PR](.github/pull_request_template.md)
 
-## Pendientes de la entrega final
-
-CRUD con JDBC, configuración JSON, Maven Wrapper, UML formal, Doxygen y reporte de cobertura. Los aportes individuales, revisiones y defensa deben documentarse durante el desarrollo.
+GitHub Actions compila el JAR y genera informes de Surefire y JaCoCo, documentación de Doxygen y diagramas SVG. Los archivos aparecen en **Actions → Build → Artifacts** cuando termina la ejecución.

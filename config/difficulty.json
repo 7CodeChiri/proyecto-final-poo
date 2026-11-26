@@ -1,0 +1,7 @@
+{
+  "recoveryDamage": 2,
+  "challengeSeconds": 45,
+  "balancedClass": "pe.poo.plugins.BalancedGenerator",
+  "recoveryClass": "pe.poo.plugins.RecoveryGenerator",
+  "challengeClass": "pe.poo.plugins.ChallengeGenerator"
+}

@@ -1,6 +1,11 @@
 package pe.poo.launcher;
 
 import pe.poo.game.Arena;
+import pe.poo.adaptive.DifficultyConfig;
+import pe.poo.adaptive.LevelSelector;
+import pe.poo.persistence.ProfileStore;
+import java.nio.file.Path;
+import java.sql.SQLException;
 import pe.poo.game.Enemy;
 import pe.poo.game.Enemy.Cell;
 
@@ -18,8 +23,11 @@ public final class GameWindow {
     private static final Color MINT = new Color(122, 237, 196);
     private static final Color WHITE = new Color(238, 243, 246);
     private static final int STEP = 25;
-    private final Run run = new Run();
-    private final JFrame frame = new JFrame("MECHA VIVA");
+    private final Run run;
+    private final ProfileStore store;
+    private ProfilesPanel profiles;
+    private ProfileStore.Profile activeProfile;
+    private final JFrame frame = new JFrame("Untitled Bomberman Game");
     private final JPanel screen = new JPanel(new BorderLayout());
     private final JPanel rewards = new JPanel(new GridBagLayout());
     private final Board board = new Board();
@@ -33,16 +41,53 @@ public final class GameWindow {
     private boolean bombHeld;
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new GameWindow().open());
+        SwingUtilities.invokeLater(() -> {
+            try {
+                var config = DifficultyConfig.load(Path.of(System.getenv()
+                    .getOrDefault("BOMBERMAN_CONFIG", "config/difficulty.json")));
+                try {
+                    var path = Path.of(System.getenv().getOrDefault("BOMBERMAN_DB", "bomberman.db"));
+                    var store = new ProfileStore(path);
+                    try {
+                        new GameWindow(config, store).open();
+                    } catch (SQLException | RuntimeException failure) {
+                        try { store.close(); } catch (SQLException closing) { failure.addSuppressed(closing); }
+                        throw failure;
+                    }
+                } catch (SQLException | java.io.IOException failure) {
+                    throw new IllegalStateException("No se pudo abrir la base de datos", failure);
+                }
+            } catch (Exception error) {
+                error.printStackTrace();
+                JOptionPane.showMessageDialog(null, error.toString(), "Error al iniciar", JOptionPane.ERROR_MESSAGE);
+            }
+        });
     }
 
-    private void open() {
+    private GameWindow(DifficultyConfig config, ProfileStore store) {
+        this.run = new Run(new LevelSelector(config));
+        this.store = store;
+    }
+
+    private void open() throws SQLException {
         screen.setBackground(BACKGROUND);
-        screen.add(board, BorderLayout.CENTER);
+        profiles = new ProfilesPanel(store, profile -> {
+            activeProfile = profile;
+            run.restart();
+            resetMotion();
+            showScreen(board);
+        });
+        screen.add(profiles, BorderLayout.CENTER);
         rewards.setBackground(BACKGROUND);
         rewards.setOpaque(true);
         frame.setContentPane(screen);
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        frame.addWindowListener(new WindowAdapter() {
+            @Override public void windowClosed(WindowEvent event) {
+                timer.stop();
+                try { store.close(); } catch (SQLException error) { error.printStackTrace(); }
+            }
+        });
         frame.addWindowFocusListener(new WindowAdapter() {
             public void windowLostFocus(WindowEvent event) {
                 held.clear();
@@ -61,7 +106,7 @@ public final class GameWindow {
             bind(key, true, () -> held.remove(key));
         }
         bind(32, false, () -> {
-            if (!bombHeld) run.placeBomb();
+            if (!bombHeld && activeProfile != null) run.placeBomb();
             bombHeld = true;
         });
         bind(32, true, () -> bombHeld = false);
@@ -83,7 +128,7 @@ public final class GameWindow {
         long now = System.nanoTime();
         long elapsed = lastFrame == 0 ? 0 : Math.min(now - lastFrame, 100_000_000L);
         lastFrame = now;
-        if (!frame.isActive() || run.phase != Run.Phase.PLAY) return;
+        if (!frame.isActive() || activeProfile == null || run.phase != Run.Phase.PLAY) return;
         animationTime += elapsed;
         simulationDebt += elapsed;
         while (simulationDebt >= STEP * 1_000_000L && run.phase == Run.Phase.PLAY) {
@@ -154,6 +199,15 @@ public final class GameWindow {
         held.clear();
         rewards.removeAll();
         boolean lost = run.phase == Run.Phase.LOST;
+        if (lost) {
+            try {
+                store.save(activeProfile.id(), run.level, run.defeated, run.totalMillis / 1000);
+                profiles.refresh(activeProfile);
+            } catch (SQLException error) {
+                JOptionPane.showMessageDialog(frame, "Error al guardar: " + error.getMessage(),
+                    "Historial", JOptionPane.ERROR_MESSAGE);
+            }
+        }
         JPanel body = new JPanel();
         body.setOpaque(false);
         body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
@@ -172,6 +226,12 @@ public final class GameWindow {
         options.setOpaque(false);
         if (lost) {
             options.add(button("Nueva partida", "Vuelve al nivel 1", "↻", MINT, run::restart));
+            var menu = new SprayCard("Perfiles", "Consultar historial", "≡", new Color(96, 213, 255));
+            menu.addActionListener(event -> {
+                activeProfile = null;
+                showScreen(profiles);
+            });
+            options.add(menu);
         } else {
                         run.offers.forEach(card -> {
                 Color ink = switch (card) {
@@ -293,7 +353,7 @@ public final class GameWindow {
             int top = 100;
             g.setColor(MINT);
             g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 26));
-            g.drawString("MECHA VIVA", left, 38);
+            g.drawString("UNTITLED BOMBERMAN GAME", left, 38);
             g.setColor(WHITE);
             g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 15));
             g.drawString("Nivel " + run.level + "   •   Vida " + run.health + "/" + run.maxHealth

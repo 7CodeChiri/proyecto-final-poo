@@ -1,5 +1,5 @@
 name: Build
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   verify:
@@ -11,8 +11,23 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: maven
-      - run: mvn -B clean verify
+      - run: ./mvnw -B clean verify
+      - name: Generate API documentation and diagrams
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y doxygen graphviz plantuml
+          doxygen Doxyfile
+          plantuml -tsvg docs/diagrams/*.puml
       - uses: actions/upload-artifact@v4
         with:
-          name: mecha-viva
+          name: untitled-bomberman-game
           path: launcher/target/launcher-0.1.0-SNAPSHOT.jar
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reports-and-docs
+          path: |
+            launcher/target/surefire-reports/
+            launcher/target/site/jacoco-aggregate/
+            launcher/target/doxygen/html/
+            docs/diagrams/*.svg
