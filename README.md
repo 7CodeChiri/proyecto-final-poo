@@ -2,6 +2,16 @@
 
 Roguelike de escritorio en Java Swing. Cruza laberintos, derrota enemigos con bombas y elige una de tres cartas al superar cada nivel. El siguiente mapa se adapta al desempeño del jugador.
 
+## ¿Primera vez en el repositorio?
+
+Esta página contiene el código fuente. El juego se abre en una ventana de Windows después de compilarlo.
+
+1. Pulsa **Code → Download ZIP** y descomprime el archivo.
+2. Abre en NetBeans la carpeta que contiene el `pom.xml`.
+3. Sigue los pasos de [Compilar y jugar](#compilar-y-jugar). La primera pantalla del juego es el menú de perfiles.
+
+Para revisar el código, empieza por `launcher`, donde están la ventana y las reglas de la partida. La [guía de arquitectura](docs/architecture.md) explica cómo se conectan las demás carpetas.
+
 ## Compilar y jugar
 
 Instala el **JDK 21** y confirma con `java -version`. El Maven Wrapper descarga **Maven 3.9.9**. La primera compilación requiere Internet.
