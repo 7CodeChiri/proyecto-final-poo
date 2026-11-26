@@ -1,6 +1,6 @@
 # Pruebas y cobertura
 
-Ejecuta `./mvnw clean verify` en Linux/macOS o `.\\mvnw.cmd clean verify` en Windows.
+Ejecuta `./mvnw clean verify` en Linux/macOS o `.\mvnw.cmd clean verify` en Windows.
 
 | Suite | Comprobación |
 | --- | --- |
