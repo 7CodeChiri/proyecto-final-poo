@@ -1,4 +1,4 @@
-# Guion de defensa
+# Esto es para la expo y lo que tenemos que hacer
 
 1. Crea un perfil de prueba. Consulta su historial, cambia el alias y deja el borrado para después de jugar.
 2. Completa un nivel en menos de 45 segundos con menos de dos puntos de daño. La interfaz anuncia el generador de desafío en Scala.
