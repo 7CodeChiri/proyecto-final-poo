@@ -24,7 +24,21 @@ java -jar .\launcher\target\launcher-0.1.0-SNAPSHOT.jar
 java -jar launcher/target/launcher-0.1.0-SNAPSHOT.jar
 ```
 
-En NetBeans, abre la misma carpeta mediante **File → Open Project**, selecciona el JDK 21 y ejecuta **Clean and Build** sobre el proyecto padre. Ejecuta el JAR con el comando anterior. Si `java -version` muestra otro JDK, configura `JAVA_HOME` y el PATH antes de compilar o usa el ejecutable del JDK 21 directamente para abrir el JAR.
+En NetBeans, abre la misma carpeta mediante **File → Open Project**, selecciona el JDK 21 y ejecuta **Clean and Build** sobre el proyecto padre. Ejecuta el JAR con el comando anterior. Si PowerShell muestra Java 8, puede fallar aunque NetBeans ya haya compilado el proyecto. Configura el JDK 21 para esta sesión antes de ejecutar el Wrapper o el JAR.
+
+```powershell
+$env:JAVA_HOME = "C:\ruta\al\jdk-21"
+$env:Path = "$env:JAVA_HOME\bin;$env:Path"
+java -version
+.\mvnw.cmd clean verify
+java -jar .\launcher\target\launcher-0.1.0-SNAPSHOT.jar
+```
+
+Reemplaza la ruta de ejemplo por la carpeta de tu JDK. Si NetBeans ya mostró `BUILD SUCCESS` y el JAR existe, puedes abrirlo directamente con el Java que usa NetBeans. Esta ruta corresponde a una instalación de NetBeans que incluye un JDK compatible.
+
+```powershell
+& "C:\Program Files\Apache NetBeans\jdk\bin\java.exe" -jar ".\launcher\target\launcher-0.1.0-SNAPSHOT.jar"
+```
 
 ## Jugar y guardar el historial
 
